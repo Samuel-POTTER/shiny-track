@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Forms from "./components/Forms/Forms";
-import { BUTTON_ACTION } from "@/constant/buttonAction";
 import { AuthProvider } from "@/context/AuthContext";
 
 export default function Home() {
@@ -14,7 +13,7 @@ export default function Home() {
           height="300"
           alt="pikachu"
         />
-        <Forms action={BUTTON_ACTION.LOGIN} />
+        <Forms />
       </main>
     </AuthProvider>
   );

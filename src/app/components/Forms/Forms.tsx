@@ -2,40 +2,44 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import { BUTTON_ACTION } from "@/constant/buttonAction";
-import { IUserInformation } from "@/types/user";
+import { useSupabase } from "@/context/SupabaseContext";
+import { useRouter } from "next/navigation";
 import { useAuthInfo } from "@/context/AuthContext";
-
-interface IFormsProps {
-  action: BUTTON_ACTION.SIGNUP | BUTTON_ACTION.LOGIN;
-}
-
-const Forms = ({ action }: IFormsProps) => {
+const Forms = () => {
   const { setUserInformation } = useAuthInfo();
+  const router = useRouter();
   const [userCredentials, setUserCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    const endpoint = action === BUTTON_ACTION.SIGNUP ? "signup" : "login";
+  const { supabase } = useSupabase();
 
-    e.preventDefault();
-
-    const userInformation = await fetch(`http://localhost:3000/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: userCredentials.email,
-        password: userCredentials.password,
-      }),
+  const handleSignUp = async () => {
+    await supabase.auth.signUp({
+      email: userCredentials.email,
+      password: userCredentials.password,
     });
 
-    const data = await userInformation.json();
+    router.push("/confirm");
+  };
 
-    setUserInformation(data);
+  const handleLogin = async () => {
+    const userInformation = await supabase.auth.signInWithPassword({
+      email: userCredentials.email,
+      password: userCredentials.password,
+    });
+
+    if (userInformation.error || !userInformation.data.user) return;
+
+    setUserInformation(userInformation.data?.user);
+    router.push("/dashboard");
+
+    userInformation?.data?.user;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
   };
 
   return (
@@ -82,19 +86,36 @@ const Forms = ({ action }: IFormsProps) => {
           />
         </span>
       </span>
-      <button
-        className="rounded-md py-3 w-full flex items-center justify-center hover:bg-blue-500 hover:duration-200 ease-in-out transition bg-blue-600 font-bold text-white"
-        type="submit"
-      >
-        {action}
-        <Image
-          className="pl-2"
-          src="/pokeballs.png"
-          alt="pokeball"
-          width={30}
-          height={30}
-        />
-      </button>
+      <div className="flex space-x-2">
+        <button
+          onClick={handleLogin}
+          className="rounded-md py-3 w-full flex items-center justify-center hover:bg-green-500 hover:duration-200 ease-in-out transition bg-green-600 font-bold text-white"
+          type="submit"
+        >
+          Login
+          <Image
+            className="pl-2"
+            src="/pokeballs.png"
+            alt="pokeball"
+            width={30}
+            height={30}
+          />
+        </button>
+        <button
+          onClick={handleSignUp}
+          className="rounded-md py-3 w-full flex items-center justify-center hover:bg-blue-500 hover:duration-200 ease-in-out transition bg-blue-600 font-bold text-white"
+          type="submit"
+        >
+          Sign Up
+          <Image
+            className="pl-2"
+            src="/pokeballs.png"
+            alt="pokeball"
+            width={30}
+            height={30}
+          />
+        </button>
+      </div>
     </form>
   );
 };

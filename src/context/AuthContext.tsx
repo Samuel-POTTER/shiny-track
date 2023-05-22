@@ -1,18 +1,17 @@
 "use client";
 import { IUserInformation } from "@/types/user";
+import { User } from "@supabase/supabase-js";
 import { createContext, useContext, useState } from "react";
 
 interface IAuthContextValue {
-  userInformation: IUserInformation | undefined;
-  setUserInformation: React.Dispatch<
-    React.SetStateAction<IUserInformation | undefined>
-  >;
+  userInformation: User;
+  setUserInformation: React.Dispatch<React.SetStateAction<User>>;
 }
 
 export const AuthContext = createContext<IAuthContextValue>(null!);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [userInformation, setUserInformation] = useState<IUserInformation>();
+  const [userInformation, setUserInformation] = useState<User>(null!);
 
   return (
     <AuthContext.Provider value={{ userInformation, setUserInformation }}>

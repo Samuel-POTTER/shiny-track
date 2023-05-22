@@ -1,8 +1,8 @@
-import { Pokemon } from "@/types";
-import { useState } from "react";
+import { Result } from "@/types";
+import { useEffect, useState } from "react";
 
 export const usePokemon = () => {
-  const [pokemon, setPokemon] = useState<Pokemon>();
+  const [pokemon, setPokemon] = useState<Result[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [nextRequest, setNextRequest] = useState(
     "https://pokeapi.co/api/v2/pokemon"
@@ -13,7 +13,12 @@ export const usePokemon = () => {
     setIsLoading(true);
     const pokemonResponse = await fetch(url);
     const pokemonData = await pokemonResponse.json();
-    setPokemon(pokemonData.results);
+    setPokemon((prev) => {
+      if (prev) {
+        return [...prev, ...pokemonData.results];
+      }
+      return pokemonData.results;
+    });
     setIsLoading(false);
     setNextRequest(pokemonData.next);
     setPrevRequest(pokemonData.previous);
@@ -30,6 +35,10 @@ export const usePokemon = () => {
       fetchPokemon(prevRequest);
     }
   };
+
+  useEffect(() => {
+    fetchNextPokemon();
+  }, []);
 
   return { pokemon, isLoading, fetchNextPokemon, fetchPreviousPokemon };
 };

@@ -24,3 +24,7 @@ body {
     rgba(88, 163, 255, 1) 100%
   );
 }
+
+.pixelated-img {
+  image-rendering: pixelated;
+}
